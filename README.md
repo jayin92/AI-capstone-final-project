@@ -9,4 +9,6 @@ Ref: [TSP Solving Utilizing Improved Ant Colony Algorithm](https://iopscience.io
 
 ### Greedy
 
-## 
+### DQN
+
+Ref: [Playing Atari with Deep Reinforcement Learning](https://arxiv.org/abs/1312.5602)
