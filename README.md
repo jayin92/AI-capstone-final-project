@@ -17,7 +17,7 @@ The Final Project of AI Capstone in NYCU CS. Using three methods to solve TSP.
 |  brg180  |    180    |         1950         |
 |   a280   |    280    |         2579         |
 |   d657   |    657    |         48912        |
-|  fl3795  |    3759   |         28772        |
+|  fl3795  |    3795   |         28772        |
 
 ## Methods
 
