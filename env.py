@@ -22,11 +22,10 @@ class TSP_Env(gym.Env):
 
         self.coords = []
         if name is not None:
-            tsp = tsplib95.load('tsplib95/archives/problems/tsp/{}.tsp'.format(name))
+            tsp = tsplib95.load('./tsp_graph/{}.tsp'.format(name))
             for i in tsp.get_nodes():
                 self.coords.append(tsp.as_name_dict()['node_coords'][i])
-            self.n = len(tsp.get_nodes()) # number of nodes
-            
+            self.n = len(list(tsp.get_nodes())) # number of nodes
         else:
             self.n = n
             self.grid_size = size
@@ -43,15 +42,14 @@ class TSP_Env(gym.Env):
         self.dist_mat = distance_matrix(self.coords, self.coords)
         self.solution = []
 
-    def reset(self):
+    def reset(self, fix_seed=True):
         """ 
         Throws n nodes uniformly at random on a square, and build a (fully connected) graph.
         Returns the (N, 2) coordinates matrix, and the (N, N) matrix containing pairwise euclidean distances.
         """
-        random.seed(self.seed)
-        np.random.seed(self.seed)
-        self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
-        self.dist_mat = distance_matrix(self.coords, self.coords)
+        if fix_seed:
+            random.seed(self.seed)
+            np.random.seed(self.seed)
         self.solution = [random.randint(0, self.n-1)]
         for i in range(self.n):
             self.mask[i] = 1 if i in self.solution else 0
@@ -135,8 +133,6 @@ class TSP_Env(gym.Env):
         return xv.reshape(-1)
 
 if __name__ == '__main__':
-    env = TSP_Env(n=10, seed=0)
-    for _ in range(10):
-        print(env.reset())
-        print(env.dist_mat)
-        print(env.coords)
+    env = TSP_Env(name='berlin52')
+    print(env.coords)
+    print(env.dist_mat)

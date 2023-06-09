@@ -9,7 +9,8 @@ from torch.autograd import Variable
 from torch import Tensor
 import os
 from tqdm import tqdm
-from RLenv import TSP_Env
+#from RLenv import TSP_Env
+from env import TSP_Env
 from torch.utils.tensorboard import SummaryWriter
 total_rewards = []
 
@@ -175,7 +176,7 @@ def test(env, episode, epsilon=-1, hidden_size= 600):
 
 if __name__ == "__main__":
     seed = 10
-    env = TSP_Env(n = 50, seed=seed)
+    env = TSP_Env(name='berlin52', seed=seed)
     torch.manual_seed(seed=seed)
     train(env,episode=125,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 600)
     test(env, episode=100, epsilon=0,  hidden_size= 600)
