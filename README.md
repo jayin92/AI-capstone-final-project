@@ -14,7 +14,7 @@ The Final Project of AI Capstone in NYCU CS. Using three methods to solve TSP.
 | **name** | **nodes** | **optimal distance** |
 |:--------:|:---------:|:--------------------:|
 | berlin52 |     52    |         7542         |
-|  brg180  |    180    |         1950         |
+|  rat99   |    99     |         1211         |
 |   a280   |    280    |         2579         |
 |   d657   |    657    |         48912        |
 |  fl3795  |    3795   |         28772        |
