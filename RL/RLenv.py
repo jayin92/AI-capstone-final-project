@@ -17,29 +17,25 @@ import tsplib95
 State = namedtuple('State', ('W', 'coords', 'partial_solution'))
 
 class TSP_Env(gym.Env):
-    def __init__(self, n = 10, name = None, size = 1, seed = 0):
+    def __init__(self, n, name = None, size = 1,seed = 0):
         super().__init__()
-
-        self.coords = []
         if name is not None:
-            tsp = tsplib95.load('tsplib95/archives/problems/tsp/{}.tsp'.format(name))
-            for i in tsp.get_nodes():
-                self.coords.append(tsp.as_name_dict()['node_coords'][i])
-            self.n = len(tsp.get_nodes()) # number of nodes
+            tsp = tsplib95.load('tsplib95/archives/problems/tsp/bay29.tsp')
             
-        else:
-            self.n = n
-            self.grid_size = size
-            self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
-            
+
+        self.n = n # number of nodes
+        self.grid_size = size # the size of 2D space
+        
         #set random seed
         self.seed = seed 
         random.seed(seed)
         np.random.seed(seed)
         self.action_space = self.n
         self.observation_space = self.n*5
+        #((self.n,self.n), (self.n, 2), (self.n))
         self.mask = [0 for _ in range(self.n)]
-        
+
+        self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
         self.dist_mat = distance_matrix(self.coords, self.coords)
         self.solution = []
 
