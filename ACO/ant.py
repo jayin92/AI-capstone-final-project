@@ -8,14 +8,14 @@ class Ant:
         self.path_cost = 0
         self.alpha = alpha
         self.beta = beta
-        self.visited = []
+        self.not_visited = set(range(num_nodes))
         self.location = random.randint(0, self.num_nodes-1)
     
     def run(self, pheromone, distances):
         self.pheromone = pheromone
         self.distances = distances
         for _ in range(self.num_nodes - 1):
-            self.visited.append(self.location)
+            self.not_visited.remove(self.location)
             self.path.append(self.location)
             nxt_node = self.choose_next()
             self.path_cost += self.distances[self.location][nxt_node]
@@ -26,14 +26,13 @@ class Ant:
     def choose_next(self):
         total = 0.0
         nxt_nodes = []
-        weights = []
-        for i in range(self.num_nodes):
-            if i not in self.visited:
-                val = self.pheromone[self.location][i] ** self.alpha * \
-                    (1.0 / (self.distances[self.location][i]+1e-8)) ** self.beta
-                weights.append(val)
-                total += val
-                nxt_nodes.append(i)
-        probs = [x / total for x in weights]
+        weights = np.zeros(shape=(len(self.not_visited)))
+        for idx, i in enumerate(self.not_visited):
+            val = float(self.pheromone[self.location][i]) ** self.alpha * \
+                (1.0 / (float(self.distances[self.location][i])+1e-8)) ** self.beta
+            weights[idx] = val
+            total += val
+            nxt_nodes.append(i)
+        probs = weights / total
 
         return np.random.choice(nxt_nodes, p=probs)

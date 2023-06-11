@@ -74,14 +74,14 @@ class TSP:
         return weights
     
     def update_pheromone(self):
-        for i, j in product(range(self.num_nodes), range(self.num_nodes)):
-            self.pheromone[i][j] *= self.rho
+        self.pheromone *= self.rho
         # sort by path cost
         self.ants.sort(key=lambda x: x.path_cost)
-        for ant in self.ants[:self.num_ants//2]:
+        for ant in self.ants:
+            val = self.q / ant.path_cost
             for i in range(len(ant.path) - 1):
-                self.pheromone[ant.path[i]][ant.path[i+1]] += self.q / ant.path_cost
-                self.pheromone[ant.path[i+1]][ant.path[i]] += self.q / ant.path_cost
+                self.pheromone[ant.path[i]][ant.path[i+1]] += val
+                self.pheromone[ant.path[i+1]][ant.path[i]] += val
 
     def run(self):
         while self.max_iter > 0:
@@ -92,7 +92,9 @@ class TSP:
             
             self.post_iteration()
             if self.patience <= 0:
-                break
+                self.beta = max(0.1, self.beta - 0.1)
+                self.patience = self.const_patience
+                print(f"Decreased beta to {self.beta}")
             self.max_iter -= 1
             print(f"Current best: {self.best[1]}, Time: {time() - start_time}")
             if self.plots:

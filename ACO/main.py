@@ -7,9 +7,11 @@ from tsp import TSP
 problem_list = [
     "berlin52",
     "rat99",
+    "bier127",
+    "ch130",
     "a280",
-    "d657",
-    "fl3795"
+   # "d657",
+   # "fl3795",
 ]
 
 
@@ -22,6 +24,13 @@ if __name__ == "__main__":
         default="berlin52", 
         choices=problem_list,
         help="choose problem")
+
+    parser.add_argument(
+        "--num_ants",
+        type=int,
+        default=10,
+        help="number of ants"
+    )
     parser.add_argument(
         "--num_workers",
         type=int,
@@ -37,12 +46,12 @@ if __name__ == "__main__":
     problem_name = args.problem
     tsp = TSP(problem_name, 
               alpha=0.9, 
-              beta=1.5, 
+              beta=6, 
               max_iter=100000, 
-              num_ants=10, 
-              patience=1000, 
-              rho=0.1, 
-              q=1, 
+              num_ants=args.num_ants, 
+              patience=5, 
+              rho=0.05, 
+              q=100, 
               num_workers=args.num_workers, 
               plots=args.plots
               )
