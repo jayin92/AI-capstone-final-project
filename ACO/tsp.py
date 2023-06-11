@@ -2,12 +2,14 @@ import tsplib95
 import matplotlib.pyplot as plt
 import numpy as np
 
+from multiprocessing import Pool
 from itertools import product
+from time import time
 
 from ant import Ant
 
 class TSP:
-    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10):
+    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False):
         """
         Args:
             problem_name (str): name of the problem
@@ -28,15 +30,17 @@ class TSP:
         self.beta = beta
         self.rho = rho
         self.q = q
+        self.plots = plots
         self.max_iter = max_iter
         self.num_ants = num_ants
         self.patience = patience
         self.const_patience = patience
+        self.num_workers = num_workers
         self.best = (None, np.inf)
         self.ants = []
         
         for _ in range(self.num_ants):
-            self.ants.append(Ant(self.num_nodes))
+            self.ants.append(Ant(self.num_nodes, self.alpha, self.beta))
 
     def post_iteration(self):
         for ant in self.ants:
@@ -56,8 +60,7 @@ class TSP:
             self.patience = self.const_patience
         self.ants = []
         for i in range(self.num_ants):
-            self.ants.append(Ant(self.num_nodes))
-        
+            self.ants.append(Ant(self.num_nodes, self.alpha, self.beta))
 
     def get_distance_matrix(self, problem_name):
         problem = tsplib95.load(f'./tsp_graph/{problem_name}.tsp')
@@ -80,36 +83,20 @@ class TSP:
                 self.pheromone[ant.path[i]][ant.path[i+1]] += self.q / ant.path_cost
                 self.pheromone[ant.path[i+1]][ant.path[i]] += self.q / ant.path_cost
 
-    def choose_next(self, ant):
-        total = 0.0
-        nxt_nodes = []
-        weights = []
-        for i in range(self.num_nodes):
-            if i not in ant.visited:
-                val = self.pheromone[ant.location][i] ** self.alpha * \
-                    (1.0 / (self.distances[ant.location][i]+1e-8)) ** self.beta
-                weights.append(val)
-                total += val
-                nxt_nodes.append(i)
-        probs = [x / total for x in weights]
-
-        return np.random.choice(nxt_nodes, p=probs)
-
     def run(self):
         while self.max_iter > 0:
-            for _ in range(self.num_nodes - 1):
-                for ant in self.ants:
-                    ant.visited.append(ant.location)
-                    ant.path.append(ant.location)
-                    nxt_node = self.choose_next(ant)
-                    ant.path_cost += self.distances[ant.location][nxt_node]
-                    ant.location = nxt_node
+            start_time = time()
+            with Pool(processes=self.num_workers) as pool:
+                self.ants = [pool.apply_async(ant.run, (self.pheromone, self.distances)) for ant in self.ants]
+                self.ants = [ant.get() for ant in self.ants]
+            
             self.post_iteration()
             if self.patience <= 0:
                 break
             self.max_iter -= 1
-            print(f"Current best: {self.best[1]}")
-            self.plot()
+            print(f"Current best: {self.best[1]}, Time: {time() - start_time}")
+            if self.plots:
+                self.plot()
                     
         return self.best
         
