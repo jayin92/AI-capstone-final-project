@@ -1,3 +1,4 @@
+import os
 import tsplib95
 import matplotlib.pyplot as plt
 import numpy as np
@@ -115,4 +116,6 @@ class TSP:
         for i in range(len(self.best[0]) - 1):
             plt.plot([self.cords_x[self.best[0][i]], self.cords_x[self.best[0][i+1]]], [self.cords_y[self.best[0][i]], self.cords_y[self.best[0][i+1]]], 'g-', lw=1)
         plt.show()
+        os.makedirs(f"./plots/{self.problem_name}", exist_ok=True)
+        plt.savefig(f"./plots/{self.problem_name}/{self.problem_name}_{int(self.best[1])}.png")
         plt.pause(0.001)

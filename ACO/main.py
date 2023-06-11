@@ -47,7 +47,7 @@ if __name__ == "__main__":
     tsp = TSP(problem_name, 
               alpha=0.9, 
               beta=6, 
-              max_iter=100000, 
+              max_iter=2000, 
               num_ants=args.num_ants, 
               patience=5, 
               rho=0.05, 
