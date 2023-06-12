@@ -10,7 +10,7 @@ from torch import Tensor
 import os
 from tqdm import tqdm
 #from RLenv import TSP_Env
-from env import TSP_Env
+from RLenv import TSP_Env
 from torch.utils.tensorboard import SummaryWriter
 total_rewards = []
 
@@ -120,9 +120,9 @@ class Agent():
                     action = np.array(random.randrange(self.n_actions))
         return action
 
-def train(env, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rate=0.999, GAMMA=0.97, batch_size=32, capacity=10000, hidden_size= 500):
+def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rate=0.999, GAMMA=0.97, batch_size=32, capacity=10000, hidden_size= 500):
     agent = Agent(env, epsilon, learning_rate, lr_decay_rate, GAMMA, batch_size, capacity, hidden_size)
-    writer = SummaryWriter('./RL/tb_record/DQN/')
+    writer = SummaryWriter('./RL/tb_record/{}'.format(map_name))
     ewma_rewards = 0
     for e in range(episode):
         state, mask = env.reset()
@@ -145,7 +145,7 @@ def train(env, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rate=0.999, G
             state = next_state
         loss = np.mean(np.array(losses)) if len(losses) > 0 else 0
         ewma_rewards = tot_rewards * 0.05 + 0.95 * ewma_rewards
-        print('Episode: {}/ Total reward: {:.3f}/ EWMA rewards: {:.3f}/ Total distance: {:.3f}/ Loss: {:.3f}'.format(e, tot_rewards, ewma_rewards, info['Distance'], loss))
+        print('Episode: {}/ Total reward: {:.3f}/ EWMA rewards: {:.3f}/ Total distance: {:.3f}/ Loss: {}'.format(e, tot_rewards, ewma_rewards, info['Distance'], loss))
         writer.add_scalar('Rewards', tot_rewards, e)
         writer.add_scalar('EWMA', ewma_rewards, e)
         writer.add_scalar('Distance', info['Distance'], e)
@@ -176,7 +176,8 @@ def test(env, episode, epsilon=-1, hidden_size= 600):
 
 if __name__ == "__main__":
     seed = 10
-    env = TSP_Env(name='berlin52', seed=seed)
-    torch.manual_seed(seed=seed)
-    train(env,episode=125,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 600)
-    test(env, episode=100, epsilon=0,  hidden_size= 600)
+    map_name = 'rat99'
+    env = TSP_Env(name=map_name, seed=seed)
+    #torch.manual_seed(seed=seed)
+    train(env, map_name, episode=1000,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 700)
+    test(env, episode=100, epsilon=0,  hidden_size= 700)

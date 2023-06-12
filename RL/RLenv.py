@@ -17,37 +17,48 @@ import tsplib95
 State = namedtuple('State', ('W', 'coords', 'partial_solution'))
 
 class TSP_Env(gym.Env):
-    def __init__(self, n, name = None, size = 1,seed = 0):
+    def __init__(self, n = 10, name = None, size = 1, seed = 0):
         super().__init__()
-        if name is not None:
-            tsp = tsplib95.load('tsplib95/archives/problems/tsp/bay29.tsp')
-            
 
-        self.n = n # number of nodes
-        self.grid_size = size # the size of 2D space
-        
+        self.coords = []
+        self.norm = 1
+        if name is not None:
+            tsp = tsplib95.load('./tsp_graph/{}.tsp'.format(name))
+            max_ = 0
+            min_ = 999999999
+            for i in tsp.get_nodes():
+                self.coords.append(tsp.as_name_dict()['node_coords'][i])
+                max_ = max([max_, tsp.as_name_dict()['node_coords'][i][0], tsp.as_name_dict()['node_coords'][i][1]])
+                min_ = min([min_, tsp.as_name_dict()['node_coords'][i][0], tsp.as_name_dict()['node_coords'][i][1]])        
+            self.norm = max_ - min_
+            self.coords = np.array(self.coords)
+            self.norm_coords = self.coords/self.norm
+            self.n = len(list(tsp.get_nodes())) # number of nodes
+        else:
+            self.n = n
+            self.grid_size = size
+            self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
+            
         #set random seed
         self.seed = seed 
         random.seed(seed)
         np.random.seed(seed)
         self.action_space = self.n
         self.observation_space = self.n*5
-        #((self.n,self.n), (self.n, 2), (self.n))
         self.mask = [0 for _ in range(self.n)]
-
-        self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
-        self.dist_mat = distance_matrix(self.coords, self.coords)
+        
+        self.int_dist_mat = distance_matrix(self.coords, self.coords).astype(int)
+        self.dist_mat = distance_matrix(self.norm_coords, self.norm_coords)
         self.solution = []
 
-    def reset(self):
+    def reset(self, fix_seed=False):
         """ 
         Throws n nodes uniformly at random on a square, and build a (fully connected) graph.
         Returns the (N, 2) coordinates matrix, and the (N, N) matrix containing pairwise euclidean distances.
         """
-        random.seed(self.seed)
-        np.random.seed(self.seed)
-        self.coords = self.grid_size * np.random.uniform(size=(self.n,2))
-        self.dist_mat = distance_matrix(self.coords, self.coords)
+        if fix_seed:
+            random.seed(self.seed)
+            np.random.seed(self.seed)
         self.solution = [random.randint(0, self.n-1)]
         for i in range(self.n):
             self.mask[i] = 1 if i in self.solution else 0
@@ -66,7 +77,7 @@ class TSP_Env(gym.Env):
             'current_solution':self.solution,
             'Dist_matrix':self.dist_mat,
             'Coordinates':self.coords,
-            'Distance':self.total_distance(self.solution, self.dist_mat)
+            'Distance':self.total_distance(self.solution, self.int_dist_mat)
         }
         return self.state2vec(next_state), reward, self.mask, done, info
     
@@ -117,7 +128,7 @@ class TSP_Env(gym.Env):
         solution = set(state.partial_solution)
         sol_last_node = state.partial_solution[-1] if len(state.partial_solution) > 0 else -1
         sol_first_node = state.partial_solution[0] if len(state.partial_solution) > 0 else -1
-        coords = state.coords
+        coords = self.norm_coords
         nr_nodes = coords.shape[0]
 
         xv = np.array([[
@@ -131,8 +142,8 @@ class TSP_Env(gym.Env):
         return xv.reshape(-1)
 
 if __name__ == '__main__':
-    env = TSP_Env(n=10, seed=0)
-    for _ in range(10):
-        print(env.reset())
-        print(env.dist_mat)
-        print(env.coords)
+    env = TSP_Env(name='berlin52')
+    a,_ = env.reset()
+    print(a)
+    print(env.coords)
+    print(env.dist_mat)
