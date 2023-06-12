@@ -152,7 +152,7 @@ def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rat
         writer.add_scalar('Loss', loss, e)
     
 
-def test(env, episode, epsilon=-1, hidden_size= 600):
+def test(env, episode, epsilon, hidden_size):
     rewards = []
     distance = []
     testing_agent = Agent(env, epsilon, hidden_size)
@@ -176,8 +176,8 @@ def test(env, episode, epsilon=-1, hidden_size= 600):
 
 if __name__ == "__main__":
     seed = 10
-    map_name = 'rat99'
+    map_name = 'a280'
     env = TSP_Env(name=map_name, seed=seed)
     #torch.manual_seed(seed=seed)
-    train(env, map_name, episode=1000,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 700)
-    test(env, episode=100, epsilon=0,  hidden_size= 700)
+    train(env, map_name, episode=1000,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 2048)
+    #test(env, episode=100, epsilon=0,  hidden_size= 700)
