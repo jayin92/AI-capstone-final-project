@@ -1,6 +1,6 @@
 all_tsp_graph/*
 plots
-
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
