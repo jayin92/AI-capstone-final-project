@@ -15,15 +15,22 @@ The Final Project of AI Capstone in NYCU CS. Using three methods to solve TSP.
 |:--------:|:---------:|:--------------------:|
 | berlin52 |     52    |         7542         |
 |  rat99   |    99     |         1211         |
+|  bier127 |    127    |       118282         |
+|  ch130   |    130    |         6110         |
 |   a280   |    280    |         2579         |
-|   d657   |    657    |         48912        |
-|  fl3795  |    3795   |         28772        |
 
 ## Methods
 
 ### Ant Colony System
 
-Ref: [TSP Solving Utilizing Improved Ant Colony Algorithm](https://iopscience.iop.org/article/10.1088/1742-6596/2129/1/012026/pdf)
+Ref: 
+- [TSP Solving Utilizing Improved Ant Colony Algorithm](https://iopscience.iop.org/article/10.1088/1742-6596/2129/1/012026/pdf)
+- https://strikingloo.github.io/ant-colony-optimization-tsp
+- [An ant colony optimization method for generalized TSP problem](https://www.sciencedirect.com/science/article/pii/S1002007108002736)
+
+#### Usage
+
+`python ./ACO/main.py`
 
 ### Firefly Algorithm
 
