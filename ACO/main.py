@@ -1,6 +1,7 @@
 import argparse
+import time
+import os
 import matplotlib.pyplot as plt
-
 
 from tsp import TSP
 
@@ -42,18 +43,45 @@ if __name__ == "__main__":
         action="store_true",
         help="plot the results"
     )
+    parser.add_argument(
+        "--max_iter",
+        type=int,
+        default=2000,
+        help="maximum number of iterations"
+    )
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=10,
+        help="patience"
+    )
     args = parser.parse_args()
     problem_name = args.problem
-    tsp = TSP(problem_name, 
-              alpha=0.9, 
-              beta=6, 
-              max_iter=2000, 
-              num_ants=args.num_ants, 
-              patience=5, 
-              rho=0.05, 
-              q=100, 
-              num_workers=args.num_workers, 
-              plots=args.plots
-              )
+    para = {
+        "problem_name": problem_name,
+        "num_ants": args.num_ants,
+        "num_workers": args.num_workers,
+        "plots": args.plots,
+        "max_iter": args.max_iter,
+        "patience": args.patience,
+        "alpha": 1,
+        "beta": 2,
+        "rho": 0.5,
+        "q": 100
+    }
+    tsp = TSP(**para)
+    start_time = time.time()
     res = tsp.run()
-
+    print("Time taken: ", time.time() - start_time)
+    print("Best cost: ", res[1])
+    # Create dir
+    os.makedirs("./logs", exist_ok=True)
+    with open("./logs/{}.txt".format(problem_name), "a") as f:
+        f.write("--------------------\n")
+        # Save configuration
+        f.write("Problem: {}\n".format(problem_name))
+        f.write(f"Configurations: {str(para)}\n")
+        # Save results
+        f.write("Best path: {}\n".format(res[0]))
+        f.write("Best cost: {}\n".format(res[1]))
+        f.write("Time taken: {}\n".format(time.time() - start_time))
