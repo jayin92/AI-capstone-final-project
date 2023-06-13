@@ -75,7 +75,7 @@ For the graph $G(V, E)$, $N = |V|$.
     ```
 
 #### Deep Neual Network Design
- The network consists of five fully connected (dense) layers (hiddent size is 1600) with ReLU activation applied to the output of each layer except for the last one. The input dimension is defined by shape of state tensor, the number of actions is defined by total number of nodes, and the size of the hidden layers is set to hidden_layer_size. The network takes input states and produces corresponding Q-values, which are used to estimate the value of each action in a reinforcement learning context.
+ The network consists of five fully connected (dense) layers (hidden size is 1600) with ReLU activation applied to the output of each layer except for the last one. The input dimension is defined by shape of state tensor, the number of actions is defined by total number of nodes, and the size of the hidden layers is set to hidden_layer_size. The network takes input states and produces corresponding Q-values, which are used to estimate the value of each action in a reinforcement learning context.
 
 #### Training result of different TSP map
 - Training hyper parameter:
