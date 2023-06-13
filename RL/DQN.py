@@ -14,6 +14,9 @@ from RLenv import TSP_Env
 from torch.utils.tensorboard import SummaryWriter
 total_rewards = []
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 
 class replay_buffer():
     '''
@@ -44,18 +47,20 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(self.input_state, hidden_layer_size)
         self.fc2 = nn.Linear(hidden_layer_size, hidden_layer_size)
         self.fc3 = nn.Linear(hidden_layer_size, hidden_layer_size)
-        self.fc4 = nn.Linear(hidden_layer_size, num_actions)
+        self.fc4 = nn.Linear(hidden_layer_size, hidden_layer_size)
+        self.fc5 = nn.Linear(hidden_layer_size, num_actions)
 
     def forward(self, states):
         x = F.relu(self.fc1(states))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        q_values = self.fc4(x)
+        x = F.relu(self.fc4(x))
+        q_values = self.fc5(x)
         return q_values
 
 
 class Agent():
-    def __init__(self, env, epsilon=0.05, learning_rate=0.01, lr_decay_rate=0.999, GAMMA=0.97, batch_size=32, capacity=10000, hidden_size= 600):
+    def __init__(self, env, epsilon=0.05, learning_rate=0.01, lr_decay_rate=0.999, GAMMA=0.97, batch_size=32, capacity=10000, hidden_size= 1024):
         self.env = env
         self.n_actions = env.n  # the number of actions
         self.state_dim = env.observation_space
@@ -70,21 +75,23 @@ class Agent():
         self.buffer = replay_buffer(self.capacity)
         self.evaluate_net = Net(self.state_dim, self.n_actions, hidden_size)  # the evaluate network
         self.target_net = Net(self.state_dim, self.n_actions, hidden_size)  # the target network
+        self.evaluate_net = self.evaluate_net.to(device)
+        self.target_net = self.target_net.to(device)
 
         self.optimizer = torch.optim.Adam(self.evaluate_net.parameters(), lr=self.learning_rate)  # Adam is a method using to optimize the neural network
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=lr_decay_rate)
 
-    def learn(self):
+    def learn(self, map_name):
         if self.count % 100 == 0:
             self.target_net.load_state_dict(self.evaluate_net.state_dict())
 
         batch =  self.buffer.sample(self.batch_size)
         #batch = (observations, actions, rewards, next_observations, done)
-        state_batch = Variable(Tensor(np.array(batch[0])))
-        action_batch = Variable(Tensor(batch[1]))
-        reward_batch = Variable(Tensor(batch[2]))
-        next_state_batch = Variable(Tensor(np.array(batch[3])))
-        mask_batch = Variable(Tensor(batch[4]))
+        state_batch = Variable(Tensor(np.array(batch[0])).to(device))
+        action_batch = Variable(Tensor(batch[1]).to(device))
+        reward_batch = Variable(Tensor(batch[2]).to(device))
+        next_state_batch = Variable(Tensor(np.array(batch[3])).to(device))
+        mask_batch = Variable(Tensor(batch[4]).to(device))
 
         Q_evaluate = torch.gather(self.evaluate_net(state_batch), 1, action_batch.view(-1, 1).long()) 
         Q_next = self.target_net(next_state_batch).detach()
@@ -98,14 +105,16 @@ class Agent():
         self.optimizer.step()
         self.scheduler.step()
 
-        torch.save(self.target_net.state_dict(), "./RL/Tables/DQN.pt")
-        return loss.detach().numpy()
+        torch.save(self.target_net.state_dict(), "./RL/Tables/DQN_{}.pt".format(map_name))
+        return loss.cpu().detach().numpy()
 
     def choose_action(self, state, mask):
+        if self.count % 100 == 0:
+            self.epsilon *= 0.8
         with torch.no_grad():
-            state = torch.Tensor(state)
+            state = torch.Tensor(state).to(device)
             if random.uniform(0,1) > self.epsilon:
-                Q_val = self.evaluate_net(state).numpy()
+                Q_val = self.evaluate_net(state).cpu().numpy()
                 #print(Q_val)
                 bst_val = -999999999
                 for i in range(self.n_actions):
@@ -139,12 +148,13 @@ def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rat
             agent.buffer.insert(state, int(action), reward, next_state, mask)
             tot_rewards += reward
             if len(agent.buffer) >= agent.batch_size:
-                losses.append(agent.learn())
+                losses.append(agent.learn(map_name))
             if done:
                 break
             state = next_state
         loss = np.mean(np.array(losses)) if len(losses) > 0 else 0
         ewma_rewards = tot_rewards * 0.05 + 0.95 * ewma_rewards
+        #if e % 200 == 0:
         print('Episode: {}/ Total reward: {:.3f}/ EWMA rewards: {:.3f}/ Total distance: {:.3f}/ Loss: {}'.format(e, tot_rewards, ewma_rewards, info['Distance'], loss))
         writer.add_scalar('Rewards', tot_rewards, e)
         writer.add_scalar('EWMA', ewma_rewards, e)
@@ -152,11 +162,11 @@ def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rat
         writer.add_scalar('Loss', loss, e)
     
 
-def test(env, episode, epsilon, hidden_size):
+def test(env, map_name, episode, epsilon, hidden_size):
     rewards = []
     distance = []
     testing_agent = Agent(env, epsilon, hidden_size)
-    testing_agent.evaluate_net.load_state_dict(torch.load("./RL/Tables/DQN.pt"))
+    testing_agent.evaluate_net.load_state_dict(torch.load("./RL/Tables/DQN_{}.pt".format(map_name)))
     for e in range(episode):
         state, mask = env.reset()
         R = 0
@@ -166,18 +176,21 @@ def test(env, episode, epsilon, hidden_size):
             next_state, reward, mask, done, info = env.step(int(action))
             R+=reward
             if done:
+                #print(R)
                 rewards.append(R)
                 distance.append(info['Distance'])
                 break
             state = next_state
-
-    print(f"reward: {np.mean(rewards)}")
-    print(f"distance: {np.mean(distance)}")
+    return np.min(distance)
 
 if __name__ == "__main__":
     seed = 10
-    map_name = 'a280'
-    env = TSP_Env(name=map_name, seed=seed)
-    #torch.manual_seed(seed=seed)
-    train(env, map_name, episode=1000,epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 2048)
-    #test(env, episode=100, epsilon=0,  hidden_size= 700)
+    maps = ['a280']
+    print(device)
+    for map_name in maps:
+        env = TSP_Env(name=map_name, seed=seed)
+        #torch.manual_seed(seed=seed)
+        print(map_name + ':')
+        train(env, map_name, episode=2000, epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 1600)
+        opt_dis = test(env, map_name, episode=100, epsilon=0,  hidden_size= 1600)
+        print("Optimal Solution Find by DQN: ", opt_dis)

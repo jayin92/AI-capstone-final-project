@@ -8,10 +8,6 @@ import time
 
 from scipy.spatial import distance_matrix
 import matplotlib.pyplot as plt
-from sklearn.neighbors import NearestNeighbors
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import connected_components
-from scipy.signal import medfilt
 import tsplib95
 
 State = namedtuple('State', ('W', 'coords', 'partial_solution'))

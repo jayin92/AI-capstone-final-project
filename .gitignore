@@ -1,4 +1,6 @@
 all_tsp_graph/*
+RL/tb_record/*
+RL/Tables/*
 plots
 .DS_Store
 
