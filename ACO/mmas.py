@@ -9,6 +9,14 @@ from time import time
 
 from ant import Ant
 
+optimal_value = {
+    "berlin52": 7542,
+    "rat99": 1211,
+    "bier127": 118282,
+    "ch130": 6110,
+    "a280": 2579,
+}
+
 class MMAS:
     def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False, name="MMAS"):
         """
@@ -137,6 +145,9 @@ class MMAS:
             print(f"Iter {iter+1}: Current best: {self.global_best[1]}, Time: {time() - start_time}")
             if self.plots:
                 self.plot()
+            if self.global_best[1] <= optimal_value[self.problem_name]:
+                print("Found optimal solution")
+                break
                     
         return self.global_best
         

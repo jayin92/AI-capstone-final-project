@@ -12,11 +12,7 @@ problem_list = [
     "bier127",
     "ch130",
     "a280",
-    "d2103",
-   # "d657",
-   "fl3795",
 ]
-
 
 if __name__ == "__main__":
     plt.ion()
