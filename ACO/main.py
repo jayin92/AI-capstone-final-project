@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 
 from tsp import TSP
+from mmas import MMAS
 
 problem_list = [
     "berlin52",
@@ -11,8 +12,9 @@ problem_list = [
     "bier127",
     "ch130",
     "a280",
+    "d2103",
    # "d657",
-   # "fl3795",
+   "fl3795",
 ]
 
 
@@ -66,17 +68,18 @@ if __name__ == "__main__":
         "patience": args.patience,
         "alpha": 1,
         "beta": 2,
-        "rho": 0.5,
-        "q": 100
+        "rho": 0.2,
+        "q": 1,
+        "name": "MMAS"
     }
-    tsp = TSP(**para)
+    tsp = eval(para["name"])(**para)
     start_time = time.time()
     res = tsp.run()
     print("Time taken: ", time.time() - start_time)
     print("Best cost: ", res[1])
     # Create dir
-    os.makedirs("./logs", exist_ok=True)
-    with open("./logs/{}.txt".format(problem_name), "a") as f:
+    os.makedirs(f"./logs/{para['name']}", exist_ok=True)
+    with open(f"./logs/{para['name']}/{para['problem_name']}.txt", "a") as f:
         f.write("--------------------\n")
         # Save configuration
         f.write("Problem: {}\n".format(problem_name))

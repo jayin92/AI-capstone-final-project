@@ -10,7 +10,7 @@ from time import time
 from ant import Ant
 
 class TSP:
-    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False):
+    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False, name="TSP"):
         """
         Args:
             problem_name (str): name of the problem
@@ -44,11 +44,7 @@ class TSP:
             self.ants.append(Ant(self.num_nodes, self.alpha, self.beta))
 
     def post_iteration(self):
-        for ant in self.ants:
-            ant.path_cost += self.distances[ant.location][ant.path[0]]
-            ant.path.append(ant.location)
-            ant.path.append(ant.path[0])
-            assert(len(ant.path) == self.num_nodes + 1)
+
 
         self.update_pheromone()
         old_best = self.best
