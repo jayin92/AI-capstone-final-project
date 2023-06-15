@@ -130,7 +130,7 @@ class MMAS:
 
         for i in range(len(path)-1):
             self.pheromone[path[i]][path[i+1]] += self.q / cost
-            # self.pheromone[path[i+1]][path[i]] += self.q / cost
+            self.pheromone[path[i+1]][path[i]] += self.q / cost
         
         self.pheromone = np.clip(self.pheromone, tau_min, tau_max)
 
