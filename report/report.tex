@@ -113,7 +113,7 @@ In summary, the Traveling Salesman Problem is a classic optimization problem tha
 
 \section{Selected Paper}
 
-In this project, we used three methods to solve TSP, including ant colony optimization (ACO), deep reinforcement learning (DRL) and firefly algorithm. In this section, we will explain these three methods and their correspond papers respectively.
+In this project, we used three methods to solve TSP, including ant colony optimization (ACO), deep Q-learning (DQN) and firefly algorithm. In this section, we will explain these three methods and their correspond papers respectively.
 
 \subsection{ACO}
 
@@ -122,7 +122,7 @@ For ACO, we mainly referenced \cite{stutzle1999aco}, this paper is a overview of
 \subsubsection{Introduction}
 Ant Colony Optimization (ACO) is widely used to solve NP-hard optimizing problem, in particular, TSP problem. In the paper, the authors introduced three different ant system methods, including ant system (AS), ant colony system (ACS) and MAX-MIN ant system (MMAS). I will breifly explain how these methods work in the next few sections.
 
-However, because of the complexity of implementation and the fact that MMAS is a improved version of AS, I will only implement MMAS, and only MMAS will be compared with DRL and firefly algorithm.
+However, because of the complexity of implementation and the fact that MMAS is a improved version of AS, I will only implement MMAS, and only MMAS will be compared with DQN and firefly algorithm.
 
 Before explaining the two methods, I will first introduce the concept of ant system. Ant system is inspired by the behavior of real ant colony. When ants are finding the shortest path from nest to food, they would spread pheromone along the path, so that other ants can follow the path to get the food. Because pheromone can evaporate, after time, longer path will get less pheromone, thus less attractive to other ants. Therefore, after period of time, the ant colony will find the shortest path eventually. 
 
@@ -143,7 +143,7 @@ Noted that in this project all the TSP problems are symmetric, i.e. $d_{ij}(t) =
 
 The are mainly three variants of AS, ant-density, ant-quantiy and ant-cycle. The first two methods update pheromone right after a move from a city to adjacent one. The ant-cycle AS update pheromone after a full tour is completed. Because ant-cycle AS perform much better than the other two variants, the paper used ant-cycle variants.
 
-In AS, each $m$ artifical ants construct a solution to TSP. Noted that local search doesn't apply to original AS.
+In AS, each $m$ artificial ants construct a solution to TSP. Noted that local search doesn't apply to original AS.
 
 \textbf{Tour Construction} Initially, each $m$ artificial ants put randoml chosen city. At each construction step, ant $k$ choose the next traverse city by the probability describe as follow:
 
@@ -235,7 +235,7 @@ where $x_A$ is the length of movement, and $r_{AB}$ is the distance between fire
 
 Than we randomly select a index in fireflyA's solution and perfrom Inverse Permutation with length $x_A$.
 
-\subsection{DRL}
+\subsection{DQN}
 
 \subsubsection{Introduction}
 
@@ -331,7 +331,7 @@ Also noted that, if our algorithm has already found the true optimal value, the 
 \end{itemize}
 
 
-\subsubsection{DRL}
+\subsubsection{DQN}
 
 \begin{itemize}
 	\item Episode: 2000
@@ -470,7 +470,7 @@ The following graphs is the visualized solutions given by MMAS and firefly algor
 
 
 \begin{table*}[b]
-	\caption{The solutions of five TSP instances given by MMAS, RL and Firefly.}
+	\caption{The solutions and statistics of five TSP instances given by MMAS, DQN and Firefly.}
 	\label{tab: results}
 	\resizebox{\textwidth}{!}{%
 		\begin{tabular}{@{}ccccccccc@{}}
@@ -484,19 +484,19 @@ The following graphs is the visualized solutions given by MMAS and firefly algor
 			\textbf{Worst Distance} &
 			\textbf{Relative Diff. (\%)} &
 			\textbf{Optimal Distance} \\ \midrule
-			\multirow{3}{*}{berlin52} & RL      & 9841.4            & 212.3       & 0.34     & 9075   & 10074  & 30.49          & \multirow{3}{*}{7542}   \\
+			\multirow{3}{*}{berlin52} & DQN      & 9841.4            & 212.3       & 0.34     & 9075   & 10074  & 30.49          & \multirow{3}{*}{7542}   \\
 			& MMAS    & \textbf{7542}     & 0           & 6.90 & 7542   & 7542   & \textbf{0}           &                         \\
 			& Firefly & 11541.2           & 1046.2      & 33.01       & 9520   & 12321  & 53.03         &                         \\
-			\multirow{3}{*}{rat99}    & RL      & 1578.6            & 70.34       & 0.16        & 1465   & 1697   & 30.36        & \multirow{3}{*}{1211}   \\
+			\multirow{3}{*}{rat99}    & DQN      & 1578.6            & 70.34       & 0.16        & 1465   & 1697   & 30.36        & \multirow{3}{*}{1211}   \\
 			& MMAS    & \textbf{1226.2}   & 7.43 & 428.65  & 1214   & 1234   & \textbf{1.26} &                         \\
 			& Firefly & 2915.6            & 278.44    & 59.72       & 2604   & 3440   & 140.76          &                         \\
-			\multirow{3}{*}{bier127}  & RL      & 221276.6          & 3125.08     & 0.2096      & 216331 & 224186 & 87.08         & \multirow{3}{*}{118282} \\
+			\multirow{3}{*}{bier127}  & DQN      & 221276.6          & 3125.08     & 0.2096      & 216331 & 224186 & 87.08         & \multirow{3}{*}{118282} \\
 			& MMAS    & \textbf{119981.8} & 277.35  & 632.72 & 119700 & 120365 & \textbf{1.44} &                         \\
 			& Firefly & 272727.6          & 8591.6      & 85.98       & 261526 & 286210 & 130.57        &                         \\
-			\multirow{3}{*}{ch130}    & RL      & 7989.6            & 385.75      & 0.214       & 7330   & 8529   & 30.76          & \multirow{3}{*}{6110}   \\
+			\multirow{3}{*}{ch130}    & DQN      & 7989.6            & 385.75      & 0.214       & 7330   & 8529   & 30.76          & \multirow{3}{*}{6110}   \\
 			& MMAS    & \textbf{6211}     & 34.34 & 657.71 & 6154   & 6240   & \textbf{1.65} &                         \\
 			& Firefly & 18001.8           & 847.49      & 68.81      & 16940  & 19055  & 194.63          &                         \\
-			\multirow{3}{*}{a280}     & RL      & 12828.2           & 181.05     & 0.8         & 12459  & 13049  & 397.41          & \multirow{3}{*}{2579}   \\
+			\multirow{3}{*}{a280}     & DQN      & 12828.2           & 181.05     & 0.8         & 12459  & 13049  & 397.41          & \multirow{3}{*}{2579}   \\
 			& MMAS    & \textbf{2685.6}   & 20.26 & 2553.39 & 2662   & 2718   & \textbf{4.13} &                         \\
 			& Firefly & 12791.4           & 366.47      & 134.7       & 12189  & 12189  & 395.98          &                         \\ \bottomrule
 		\end{tabular}%
@@ -506,8 +506,46 @@ The following graphs is the visualized solutions given by MMAS and firefly algor
 
 \section{Discussion}
 
+\subsection{The running time of MMAS}
+
+As in \autoref{tab: tsplib}, the average running time of MMAS is significant higher than other two methods, the reason is that the algorithm always run for 500 iterations if it didn't found optimal solution. Actually, it may converge to the results in the early iterations. Therefore, the actual running time when can be lower. For example, MMAS can find the optimal solution of berlin52 before tenth iterations.
+
+In conclusion, when we used MMAS, we can stop the algorithm if we observe that the given solution has already converged.
+
+
+\subsection{The solution quality of MMAS}
+
+MMAS introduced many techniques to find the balance between exploitation and exploration, and it also utilized the use of local search and heuristic information, all of these make the solution quality of MMAS is significant better than other two methods, with only 5\% maximum relative difference to optimal solution.
+
+\subsection{The solution quality of firefly algorithm}
+
+The performance of Firefly Algorithm is not ideal, most of the time it well stuck at local optimal and could not get the optimal solution at all 5 problems.The problem is that the design of the algorithm does not have any mechanism that incentivize fireflies from getting better solutions besides natural selection, so it is basically a genetic algorithm.
+
+Some possible ways to improve Firefly Algorithm:
+
+\begin{itemize}
+	\item Define how fireflies move differently: In the original paper the movement of a firefly is defined by doing inverse permutation on the solution, while it could preserver the order of the cities, but there is no "direction" in this definition. Thus to fully unleash the power of Firefly Algorithm, we may need to redefine how a firefly moves.
+	\item Clustering: Since in every iteration it would only select the best fireflies, it is likely that the fireflies remains are almost the same. So maybe cluster the fireflies into different species and in each iterations fireflies in different cluster have a chance to exchange genome could prevent the algorithm from stucking in local optimal.
+\end{itemize}
+
+\subsection{The solution quality of DQN}
+
+In the experiments, we can found that DQN did not performed well in the TSP taks. There are following reasons why DQN can not solve this problem.
+
+\begin{itemize}
+	\item High dimensionality: TSP has a high-dimensional search space, making it challenging for DQN to explore and learn an optimal policy effectively.
+	\item Lack of generalization: In the TSP, the problem size increases exponentially with the number of cities, making it impractical to train DQN on all possible problem instances. Consequently, DQN may struggle to generalize its learned policy to unseen TSP instances.
+\end{itemize}
+
+In conclusion, through DQN has the ability to leverage dynamic progamming method and it can solve the problem optimaly in theory, it can not perform well. In the future, we may design a new neural network with more sophisticated architecture to solve the problems above. 
+
+
+
 \section{Conclusion}
 
+In this project, we implement three different methods, MMAS \cite{stutzle1999aco}, firefly algorithm\cite{jati2011evolutionary} and DQN\cite{mnih2013playing}. In these three methods, the performance of MMAS is better than two methods, and MMAS is also able to speed up by parallel simulate the ants. 
+
+DQN methods can be 
 
 
 \printbibliography
