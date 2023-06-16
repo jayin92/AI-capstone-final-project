@@ -195,10 +195,11 @@ def test(env, map_name, episode, epsilon, hidden_size):
 
 if __name__ == "__main__":
     seed = 10
-    maps = ['a280']
-    #maps = ['berlin52', 'bier127', 'ch130', 'rat99']
+    #maps = ['a280'] # hidden size = 1600
+    maps = ['berlin52', 'bier127', 'ch130', 'rat99'] # hidden size = 1024
     for map_name in maps:
         env = TSP_Env(name=map_name, seed=seed)
         #torch.manual_seed(seed=seed)
         #train(env, map_name, episode=200, epsilon=0.05, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 2000)
-        opt_dis = test(env, map_name, episode=5, epsilon=0,  hidden_size= 2000)
+        opt_dis = test(env, map_name, episode=1, epsilon=0,  hidden_size= 1024)
+        env.plot()

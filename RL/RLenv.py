@@ -18,6 +18,7 @@ class TSP_Env(gym.Env):
 
         self.coords = []
         self.norm = 1
+        self.name = name
         if name is not None:
             tsp = tsplib95.load('./tsp_graph/{}.tsp'.format(name))
             max_ = 0
@@ -136,6 +137,23 @@ class TSP_Env(gym.Env):
             ] for i in range(nr_nodes)])
         
         return xv.reshape(-1)
+    
+    def plot(self):
+        plt.clf()
+        graph = plt.plot(self.coords[:,0], self.coords[:,1], 'ro')
+        plt.title(f"{self.name}, Current Cost: {self.total_distance(self.solution, self.int_dist_mat)}, Method: DQN")
+        # for i in range(self.num_nodes):
+        #     plt.annotate(i, (self.cords_x[i], self.cords_y[i]))
+        # for i in range(self.num_nodes):
+        #     for j in range(self.num_nodes):
+        #         if i != j:
+        #             plt.plot([self.cords_x[i], self.cords_x[j]], [self.cords_y[i], self.cords_y[j]], 'k-', lw=0.5)
+        for i in range(len(self.solution)-1):
+            plt.plot([self.coords[i][0], self.coords[i+1][0]], [self.coords[i][1], self.coords[i+1][1]], 'g-', lw=1)
+        plt.show()
+        os.makedirs(f"./RL/plots/", exist_ok=True)
+        plt.savefig(f"./RL/plots/{self.name}.png")
+        plt.pause(0.001)
 
 if __name__ == '__main__':
     env = TSP_Env(name='berlin52')
