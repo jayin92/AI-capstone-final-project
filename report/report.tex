@@ -117,7 +117,7 @@ In this project, we used three methods to solve TSP, including ant colony optimi
 
 \subsection{ACO}
 
-For ACO, we mainly referenced \cite{stutzle1999aco}, this paper is a overview of using ACO to solve TSP. It introduced three methods of ACO, we will introduce these three methods.
+For ACO, we mainly referenced \cite{stutzle1999aco}, this paper is a overview of using ACO to solve TSP. It introduced three methods of ACO, ant system, ant colony system and MAX-MIN ant system.
 
 \subsubsection{Introduction}
 Ant Colony Optimization (ACO) is widely used to solve NP-hard optimizing problem, in particular, TSP problem. In the paper, the authors introduced three different ant system methods, including ant system (AS), ant colony system (ACS) and MAX-MIN ant system (MMAS). I will breifly explain how these methods work in the next few sections.
@@ -136,7 +136,7 @@ The below notations will be used in the two methods.
 	\item $\eta_{ij}(t)$ is the priori available heuristic value of arc $(i, j)$. Usually set to $1/d_{ij}(t)$
 \end{itemize}
 
-
+	
 Noted that in this project all the TSP problems are symmetric, i.e. $d_{ij}(t) = d_{ji}(t)$. Therefore, $\tau_{ij}(t)$ is also symmetric, i.e. $\tau_{ij}(t) = \tau_{ji}(t)$.
 
 \subsubsection{AS}
@@ -175,7 +175,7 @@ By \textbf{Tour Construction} and \textbf{Pheromone Update}, the AS algorithm ca
 
 \subsubsection{MMAS}
 
-MIN-MAX ant system (MMAS) is also a improved AS. Not like ACS, the implementation of MMAS is very similar to AS. The solutions in MMAS are constructed in exactly the same way as in AS, that is, the selection probabilities are calculated as in \autoref{eq: choice}. 
+MAX-MIN ant system (MMAS)\cite{stutzle2000max} is also a improved AS. Not like ACS, the implementation of MMAS is very similar to AS. The solutions in MMAS are constructed in exactly the same way as in AS, that is, the selection probabilities are calculated as in \autoref{eq: choice}. 
 
 The main modification of MMAS is that it adopted the lower and upper bound for pheromone level, the lower and upper bound is denoted as $\tau_{min}$ and $\tau_{max}$ respectively. After pheromone update, any value that is smaller than $\tau_{min}$ will be increased to $\tau_{min}$ and any value that is greater than $\tau_{max}$ will be decreased to $\tau_{max}$. In this way, we can avoid that ants fall into local optimal, with each cities has relatively higher chance to be traversed compared with original AS.
 
@@ -545,7 +545,7 @@ In conclusion, through DQN has the ability to leverage dynamic progamming method
 
 In this project, we implement three different methods, MMAS \cite{stutzle1999aco}, firefly algorithm\cite{jati2011evolutionary} and DQN\cite{mnih2013playing}. In these three methods, the performance of MMAS is better than two methods, and MMAS is also able to speed up by parallel simulate the ants. 
 
-DQN methods can be 
+DQN methods can be improved by adjusting the network architecture. As for firefly algorithm, because the original algorithm can have direction, but in TSP, direction is limited, therefore the performance is not ideal. We guess that maybe clustering can make the performance better.
 
 
 \printbibliography
