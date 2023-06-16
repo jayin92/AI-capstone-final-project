@@ -10,7 +10,7 @@ from time import time
 from ant import Ant
 
 class TSP:
-    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False):
+    def __init__(self, problem_name, max_iter, num_ants, alpha=0.9, beta=1.5, rho=0.9, q=1.0, patience=10, num_workers=4, plots=False, name="TSP"):
         """
         Args:
             problem_name (str): name of the problem
@@ -44,11 +44,7 @@ class TSP:
             self.ants.append(Ant(self.num_nodes, self.alpha, self.beta))
 
     def post_iteration(self):
-        for ant in self.ants:
-            ant.path_cost += self.distances[ant.location][ant.path[0]]
-            ant.path.append(ant.location)
-            ant.path.append(ant.path[0])
-            assert(len(ant.path) == self.num_nodes + 1)
+
 
         self.update_pheromone()
         old_best = self.best
@@ -66,7 +62,7 @@ class TSP:
     def get_distance_matrix(self, problem_name):
         problem = tsplib95.load(f'./tsp_graph/{problem_name}.tsp')
         node_num = len(list(problem.get_nodes()))
-        weights = np.zeros(shape=(node_num, node_num))
+        weights = np.zeros(shape=(node_num, node_num), dtype=int)
         for i in problem.get_nodes():
             self.cords_x.append(problem.as_name_dict()['node_coords'][i][0])
             self.cords_y.append(problem.as_name_dict()['node_coords'][i][1])
@@ -78,14 +74,14 @@ class TSP:
         self.pheromone *= self.rho
         # sort by path cost
         self.ants.sort(key=lambda x: x.path_cost)
-        for ant in self.ants:
+        for ant in self.ants[:self.num_ants//2]:
             val = self.q / ant.path_cost
             for i in range(len(ant.path) - 1):
                 self.pheromone[ant.path[i]][ant.path[i+1]] += val
                 self.pheromone[ant.path[i+1]][ant.path[i]] += val
 
     def run(self):
-        while self.max_iter > 0:
+        for iter in range(self.max_iter):
             start_time = time()
             with Pool(processes=self.num_workers) as pool:
                 self.ants = [pool.apply_async(ant.run, (self.pheromone, self.distances)) for ant in self.ants]
@@ -96,8 +92,7 @@ class TSP:
                 self.beta = max(0.1, self.beta - 0.1)
                 self.patience = self.const_patience
                 print(f"Decreased beta to {self.beta}")
-            self.max_iter -= 1
-            print(f"Current best: {self.best[1]}, Time: {time() - start_time}")
+            print(f"Iter {iter+1}: Current best: {self.best[1]}, Time: {time() - start_time}")
             if self.plots:
                 self.plot()
                     

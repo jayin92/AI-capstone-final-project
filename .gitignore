@@ -3,6 +3,8 @@ RL/tb_record/*
 RL/Tables/*
 plots
 .DS_Store
+d2103.tsp
+fl3795.tsp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

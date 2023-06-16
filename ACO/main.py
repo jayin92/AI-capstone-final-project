@@ -1,8 +1,10 @@
 import argparse
+import time
+import os
 import matplotlib.pyplot as plt
 
-
 from tsp import TSP
+from mmas import MMAS
 
 problem_list = [
     "berlin52",
@@ -10,10 +12,7 @@ problem_list = [
     "bier127",
     "ch130",
     "a280",
-   # "d657",
-   # "fl3795",
 ]
-
 
 if __name__ == "__main__":
     plt.ion()
@@ -42,18 +41,46 @@ if __name__ == "__main__":
         action="store_true",
         help="plot the results"
     )
+    parser.add_argument(
+        "--max_iter",
+        type=int,
+        default=2000,
+        help="maximum number of iterations"
+    )
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=10,
+        help="patience"
+    )
     args = parser.parse_args()
     problem_name = args.problem
-    tsp = TSP(problem_name, 
-              alpha=0.9, 
-              beta=6, 
-              max_iter=2000, 
-              num_ants=args.num_ants, 
-              patience=5, 
-              rho=0.05, 
-              q=100, 
-              num_workers=args.num_workers, 
-              plots=args.plots
-              )
+    para = {
+        "problem_name": problem_name,
+        "num_ants": args.num_ants,
+        "num_workers": args.num_workers,
+        "plots": args.plots,
+        "max_iter": args.max_iter,
+        "patience": args.patience,
+        "alpha": 1,
+        "beta": 2,
+        "rho": 0.2,
+        "q": 1,
+        "name": "MMAS"
+    }
+    tsp = eval(para["name"])(**para)
+    start_time = time.time()
     res = tsp.run()
-
+    print("Time taken: ", time.time() - start_time)
+    print("Best cost: ", res[1])
+    # Create dir
+    os.makedirs(f"./logs/{para['name']}", exist_ok=True)
+    with open(f"./logs/{para['name']}/{para['problem_name']}.txt", "a") as f:
+        f.write("--------------------\n")
+        # Save configuration
+        f.write("Problem: {}\n".format(problem_name))
+        f.write(f"Configurations: {str(para)}\n")
+        # Save results
+        f.write("Best path: {}\n".format(res[0]))
+        f.write("Best cost: {}\n".format(res[1]))
+        f.write("Time taken: {}\n".format(time.time() - start_time))
