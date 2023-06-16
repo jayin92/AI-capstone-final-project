@@ -8,6 +8,7 @@ from collections import deque
 from torch.autograd import Variable
 from torch import Tensor
 import os
+import time
 from tqdm import tqdm
 #from RLenv import TSP_Env
 from RLenv import TSP_Env
@@ -16,7 +17,7 @@ total_rewards = []
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 class replay_buffer():
     '''
@@ -108,9 +109,7 @@ class Agent():
         torch.save(self.target_net.state_dict(), "./RL/Tables/DQN_{}.pt".format(map_name))
         return loss.cpu().detach().numpy()
 
-    def choose_action(self, state, mask):
-        if self.count % 100 == 0:
-            self.epsilon *= 0.8
+    def choose_action(self, state, mask, ep = 1):
         with torch.no_grad():
             state = torch.Tensor(state).to(device)
             if random.uniform(0,1) > self.epsilon:
@@ -142,9 +141,9 @@ def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rat
             count += 1
             agent.count += 1
             # env.render()
-            action = agent.choose_action(state, mask)
+            action = agent.choose_action(state, mask, e)
             next_state, reward, mask, done, info = env.step(int(action))
-            
+
             agent.buffer.insert(state, int(action), reward, next_state, mask)
             tot_rewards += reward
             if len(agent.buffer) >= agent.batch_size:
@@ -165,11 +164,13 @@ def train(env, map_name, episode, epsilon=0.03, learning_rate=0.01, lr_decay_rat
 def test(env, map_name, episode, epsilon, hidden_size):
     rewards = []
     distance = []
-    testing_agent = Agent(env, epsilon, hidden_size)
+    run_time = []
+    testing_agent = Agent(env, epsilon=epsilon, learning_rate=0, lr_decay_rate=0, GAMMA=1, batch_size=32, capacity=1000000, hidden_size=hidden_size)
     testing_agent.evaluate_net.load_state_dict(torch.load("./RL/Tables/DQN_{}.pt".format(map_name)))
     for e in range(episode):
         state, mask = env.reset()
         R = 0
+        start = time.time()
         while True:
             #env.render()
             action = testing_agent.choose_action(state, mask)
@@ -177,20 +178,27 @@ def test(env, map_name, episode, epsilon, hidden_size):
             R+=reward
             if done:
                 #print(R)
+                end = time.time()
+                ex_time = end-start
+                run_time.append(ex_time)
                 rewards.append(R)
                 distance.append(info['Distance'])
                 break
             state = next_state
-    return np.min(distance)
+    print(map_name + ":")
+    print("Avg: ", np.mean(distance))
+    print("Std: ", np.std(distance))
+    print("Max: ", np.max(distance))
+    print("Min: ", np.min(distance))
+    print("Avg time: ", np.mean(run_time))
+    print("="*5)
 
 if __name__ == "__main__":
     seed = 10
     maps = ['a280']
-    print(device)
+    #maps = ['berlin52', 'bier127', 'ch130', 'rat99']
     for map_name in maps:
         env = TSP_Env(name=map_name, seed=seed)
         #torch.manual_seed(seed=seed)
-        print(map_name + ':')
-        train(env, map_name, episode=2000, epsilon=0.03, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 1600)
-        opt_dis = test(env, map_name, episode=100, epsilon=0,  hidden_size= 1600)
-        print("Optimal Solution Find by DQN: ", opt_dis)
+        #train(env, map_name, episode=200, epsilon=0.05, learning_rate=5e-3, lr_decay_rate=1. - 2e-5,GAMMA=0.997, batch_size=32, capacity=10000, hidden_size= 2000)
+        opt_dis = test(env, map_name, episode=5, epsilon=0,  hidden_size= 2000)
